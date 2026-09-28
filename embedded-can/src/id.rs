@@ -19,7 +19,6 @@ impl StandardId {
     ///
     /// This will return an error if `raw` is out of range of an 11-bit integer (`> 0x7FF`).
     #[inline]
-    #[must_use]
     pub const fn new(raw: u16) -> Result<Self, ErrorKind> {
         if raw <= 0x7FF {
             Ok(Self(raw))
@@ -62,7 +61,6 @@ impl ExtendedId {
     ///
     /// This will return an error if `raw` is out of range of a 29-bit integer (`> 0x1FFF_FFFF`).
     #[inline]
-    #[must_use]
     pub const fn new(raw: u32) -> Result<Self, ErrorKind> {
         if raw <= 0x1FFF_FFFF {
             Ok(Self(raw))
