@@ -1,5 +1,8 @@
 //! CAN Identifiers.
 
+// Import ErrorKind to return standard CAN validation errors from ID constructors
+use crate::ErrorKind;
+
 /// Standard 11-bit CAN Identifier (`0..=0x7FF`).
 #[derive(Debug, Copy, Clone, Eq, PartialEq, PartialOrd, Ord, Hash)]
 #[cfg_attr(feature = "defmt", derive(defmt::Format))]
@@ -12,16 +15,16 @@ impl StandardId {
     /// CAN ID `0x7FF`, the lowest priority.
     pub const MAX: Self = Self(0x7FF);
 
-    /// Tries to create a `StandardId` from a raw 16-bit integer.
+   /// Tries to create a `StandardId` from a raw 16-bit integer.
     ///
-    /// This will return `None` if `raw` is out of range of an 11-bit integer (`> 0x7FF`).
+    /// This will return an error if `raw` is out of range of an 11-bit integer (`> 0x7FF`).
     #[inline]
     #[must_use]
-    pub const fn new(raw: u16) -> Option<Self> {
+    pub const fn new(raw: u16) -> Result<Self, ErrorKind> {
         if raw <= 0x7FF {
-            Some(Self(raw))
+            Ok(Self(raw))
         } else {
-            None
+            Err(ErrorKind::InvalidId)
         }
     }
 
@@ -55,19 +58,18 @@ impl ExtendedId {
     /// CAN ID `0x1FFFFFFF`, the lowest priority.
     pub const MAX: Self = Self(0x1FFF_FFFF);
 
-    /// Tries to create a `ExtendedId` from a raw 32-bit integer.
+   /// Tries to create an `ExtendedId` from a raw 32-bit integer.
     ///
-    /// This will return `None` if `raw` is out of range of an 29-bit integer (`> 0x1FFF_FFFF`).
+    /// This will return an error if `raw` is out of range of a 29-bit integer (`> 0x1FFF_FFFF`).
     #[inline]
     #[must_use]
-    pub const fn new(raw: u32) -> Option<Self> {
+    pub const fn new(raw: u32) -> Result<Self, ErrorKind> {
         if raw <= 0x1FFF_FFFF {
-            Some(Self(raw))
+            Ok(Self(raw))
         } else {
-            None
+            Err(ErrorKind::InvalidId)
         }
     }
-
     /// Creates a new `ExtendedId` without checking if it is inside the valid range.
     ///
     /// # Safety
@@ -178,36 +180,45 @@ impl From<ExtendedId> for Id {
 mod tests {
     use super::*;
 
-    #[test]
+   #[test]
     fn standard_id_new() {
+        // Test that a valid standard ID is successfully created
         assert_eq!(
             StandardId::new(StandardId::MAX.as_raw()),
-            Some(StandardId::MAX)
+            Ok(StandardId::MAX)
         );
     }
 
-    #[test]
+   #[test]
     fn standard_id_new_out_of_range() {
-        assert_eq!(StandardId::new(StandardId::MAX.as_raw() + 1), None);
+        // Test that creating a standard ID out of bounds returns an InvalidId error
+        assert_eq!(
+            StandardId::new(StandardId::MAX.as_raw() + 1),
+            Err(ErrorKind::InvalidId)
+        );
     }
-
     #[test]
     fn standard_id_new_unchecked_out_of_range() {
         let id = StandardId::MAX.as_raw() + 1;
         assert_eq!(unsafe { StandardId::new_unchecked(id) }, StandardId(id));
     }
 
-    #[test]
+   #[test]
     fn extended_id_new() {
+        // Test that a valid extended ID is successfully created
         assert_eq!(
             ExtendedId::new(ExtendedId::MAX.as_raw()),
-            Some(ExtendedId::MAX)
+            Ok(ExtendedId::MAX)
         );
     }
 
     #[test]
     fn extended_id_new_out_of_range() {
-        assert_eq!(ExtendedId::new(ExtendedId::MAX.as_raw() + 1), None);
+        // Test that creating an extended ID out of bounds returns an InvalidId error
+        assert_eq!(
+            ExtendedId::new(ExtendedId::MAX.as_raw() + 1),
+            Err(ErrorKind::InvalidId)
+        );
     }
 
     #[test]
@@ -218,9 +229,10 @@ mod tests {
 
     #[test]
     fn get_standard_id_from_extended_id() {
+        // Test extracting standard ID from extended ID using Result unwrap
         assert_eq!(
-            Some(ExtendedId::MAX.standard_id()),
-            StandardId::new((ExtendedId::MAX.0 >> 18) as u16)
+            ExtendedId::MAX.standard_id(),
+            StandardId::new((ExtendedId::MAX.0 >> 18) as u16).unwrap()
         );
     }
 
