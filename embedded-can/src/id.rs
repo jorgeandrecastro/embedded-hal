@@ -15,7 +15,7 @@ impl StandardId {
     /// CAN ID `0x7FF`, the lowest priority.
     pub const MAX: Self = Self(0x7FF);
 
-   /// Tries to create a `StandardId` from a raw 16-bit integer.
+    /// Tries to create a `StandardId` from a raw 16-bit integer.
     ///
     /// This will return an error if `raw` is out of range of an 11-bit integer (`> 0x7FF`).
     #[inline]
@@ -58,7 +58,7 @@ impl ExtendedId {
     /// CAN ID `0x1FFFFFFF`, the lowest priority.
     pub const MAX: Self = Self(0x1FFF_FFFF);
 
-   /// Tries to create an `ExtendedId` from a raw 32-bit integer.
+    /// Tries to create an `ExtendedId` from a raw 32-bit integer.
     ///
     /// This will return an error if `raw` is out of range of a 29-bit integer (`> 0x1FFF_FFFF`).
     #[inline]
@@ -180,7 +180,7 @@ impl From<ExtendedId> for Id {
 mod tests {
     use super::*;
 
-   #[test]
+    #[test]
     fn standard_id_new() {
         // Test that a valid standard ID is successfully created
         assert_eq!(
@@ -189,7 +189,7 @@ mod tests {
         );
     }
 
-   #[test]
+    #[test]
     fn standard_id_new_out_of_range() {
         // Test that creating a standard ID out of bounds returns an InvalidId error
         assert_eq!(
@@ -203,7 +203,7 @@ mod tests {
         assert_eq!(unsafe { StandardId::new_unchecked(id) }, StandardId(id));
     }
 
-   #[test]
+    #[test]
     fn extended_id_new() {
         // Test that a valid extended ID is successfully created
         assert_eq!(
