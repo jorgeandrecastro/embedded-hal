@@ -229,8 +229,8 @@ mod tests {
     fn get_standard_id_from_extended_id() {
         // Test extracting standard ID from extended ID using Result unwrap
         assert_eq!(
-            ExtendedId::MAX.standard_id(),
-            StandardId::new((ExtendedId::MAX.0 >> 18) as u16).unwrap()
+            Ok(ExtendedId::MAX.standard_id()),
+            StandardId::new((ExtendedId::MAX.0 >> 18) as u16)
         );
     }
 
